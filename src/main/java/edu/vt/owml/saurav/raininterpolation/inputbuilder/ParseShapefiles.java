@@ -109,6 +109,30 @@ public class ParseShapefiles {
             this.labels = labels;
         }
 
+        public String getProjectionSystem() {
+            return projectionSystem;
+        }
+
+        public void setProjectionSystem(String projectionSystem) {
+            this.projectionSystem = projectionSystem;
+        }
+
+        public GeometryTypeString getType() {
+            return type;
+        }
+
+        public void setType(GeometryTypeString type) {
+            this.type = type;
+        }
+
+        public List<String> getLabels() {
+            return labels;
+        }
+
+        public void setLabels(List<String> labels) {
+            this.labels = labels;
+        }
+
     }
 
     public static void main(String[] args) throws IOException {

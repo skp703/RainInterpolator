@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.vt.owml.saurav.raininterpolation.inputbuilder;
+package edu.vt.owml.saurav.raininterpolation.GUI;
 
 import java.io.File;
 
@@ -22,10 +22,11 @@ import java.io.File;
  *
  * @author saurav
  */
-public class InputStore {
+public class GUIInputStore {
 
     File stationsFile, watershedFile, dataFile;
     String attributeForStationLabel;
+    int gridNumber;
 
     public File getStationsFile() {
         return stationsFile;
@@ -57,6 +58,14 @@ public class InputStore {
 
     public void setAttributeForStationLabel(String attributeForStationLabel) {
         this.attributeForStationLabel = attributeForStationLabel;
+    }
+
+    public int getGridNumber() {
+        return gridNumber;
+    }
+
+    public void setGridNumber(int gridNumber) {
+        this.gridNumber = gridNumber;
     }
 
 }

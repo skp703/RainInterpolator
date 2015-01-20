@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.vt.owml.saurav.raininterpolation.inputbuilder;
+package edu.vt.owml.saurav.raininterpolation.GUI;
 
+import edu.vt.owml.saurav.raininterpolation.inputbuilder.GridMaker;
+import edu.vt.owml.saurav.raininterpolation.inputbuilder.LastState;
+import edu.vt.owml.saurav.raininterpolation.inputbuilder.ParseShapefiles;
 import edu.vt.owml.saurav.raininterpolation.inputbuilder.ParseShapefiles.GeometryTypeString;
 import java.awt.Color;
 import java.io.File;
@@ -29,6 +32,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -36,7 +42,7 @@ import javax.swing.text.html.HTMLEditorKit;
  */
 public class MainGUI extends javax.swing.JFrame {
 
-    private InputStore is;
+    private GUIInputStore is;
     private LastState ls;
     public static Color Okay = Color.green;
     public static Color notOkay = Color.red;
@@ -47,7 +53,8 @@ public class MainGUI extends javax.swing.JFrame {
     public MainGUI() {
         initComponents();
         ls = new LastState();
-        is = new InputStore();
+        is = new GUIInputStore();
+        is.setGridNumber((int) gridElementsNumber.getValue());
         fileChooser.setCurrentDirectory(new File(ls.getLastFileOpenDirectory()));
         messagesPane.setEditable(false);
         messagesPane.setContentType("text/html");
@@ -81,6 +88,9 @@ public class MainGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         fileChooser = new javax.swing.JFileChooser();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        messagesPane = new javax.swing.JTextPane();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         stationLabel = new javax.swing.JLabel();
         watershedLabel = new javax.swing.JLabel();
@@ -93,9 +103,14 @@ public class MainGUI extends javax.swing.JFrame {
         rainValuesLabel = new javax.swing.JLabel();
         attributeCombo = new javax.swing.JComboBox();
         jLabel4 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        messagesPane = new javax.swing.JTextPane();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        gridElementsNumber = new javax.swing.JSpinner();
+        jLabel3 = new javax.swing.JLabel();
         renderGridButton = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         OpenMenu = new javax.swing.JMenuItem();
@@ -104,11 +119,14 @@ public class MainGUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rain Interpolator");
 
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Messages"));
+        jScrollPane1.setViewportView(messagesPane);
+
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input Files"));
 
         stationLabel.setBackground(notOkay);
         stationLabel.setLabelFor(selectStationButton);
-        stationLabel.setText("Rain Stations Point Shapefile");
+        stationLabel.setText("Rain Stations Shapefile (Point type)");
         stationLabel.setOpaque(true);
 
         watershedLabel.setBackground(notOkay);
@@ -156,67 +174,20 @@ public class MainGUI extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setText("Station name col");
+        jLabel4.setText("Station name columns");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(dataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(selectDataButton))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(watershedLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(selectWatershedButton))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(stationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(selectStationButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(stationShapefileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(attributeCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(watershedShapefileLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 550, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(rainValuesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(selectStationButton)
-                    .addComponent(stationShapefileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(attributeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4)
-                    .addComponent(stationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(6, 6, 6)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(watershedShapefileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(selectWatershedButton)
-                    .addComponent(watershedLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(rainValuesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(selectDataButton)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(dataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
+        jLabel2.setText("Format should be \"date(yyyymmdd),station,rain\". First line will be ignored");
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Messages"));
-        jScrollPane1.setViewportView(messagesPane);
+        jLabel1.setText("Grid Elements");
+
+        gridElementsNumber.setValue(50);
+        gridElementsNumber.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                gridElementsNumberStateChanged(evt);
+            }
+        });
+
+        jLabel3.setText(" Click \"View Grid\" button to visualize grid");
 
         renderGridButton.setText("View Grid");
         renderGridButton.setEnabled(false);
@@ -225,6 +196,120 @@ public class MainGUI extends javax.swing.JFrame {
                 renderGridButtonActionPerformed(evt);
             }
         });
+
+        jLabel5.setText("Click to generate inputs");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(stationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(selectStationButton))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(dataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(watershedLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(selectWatershedButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(selectDataButton, javax.swing.GroupLayout.Alignment.TRAILING))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(stationShapefileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+                    .addComponent(watershedShapefileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rainValuesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(renderGridButton, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel5)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(attributeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(116, 116, 116))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(gridElementsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(selectStationButton)
+                    .addComponent(stationShapefileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(attributeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(stationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(watershedShapefileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(selectWatershedButton)
+                            .addComponent(watershedLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(gridElementsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(rainValuesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(selectDataButton)
+                            .addComponent(jLabel2)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(dataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(renderGridButton)
+                    .addComponent(jLabel5))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Input", jPanel1);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 949, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 133, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Execution", jPanel2);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 949, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 133, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Analysis", jPanel3);
 
         jMenu1.setText("File");
 
@@ -254,24 +339,16 @@ public class MainGUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(renderGridButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jTabbedPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(renderGridButton)
-                .addGap(15, 15, 15))
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -294,7 +371,7 @@ public class MainGUI extends javax.swing.JFrame {
 
     private void printStationNames() {
         try {
-            List<String> readAttributes = ParseShapefiles.readAttributes(is.stationsFile, is.attributeForStationLabel);
+            List<String> readAttributes = ParseShapefiles.readAttributes(is.getStationsFile(), is.getAttributeForStationLabel());
             appendToMessage("Attribute values: " + expand(readAttributes), false);
         } catch (IOException ex) {
             Logger.getLogger(MainGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -310,12 +387,12 @@ public class MainGUI extends javax.swing.JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
                 ParseShapefiles.ShapeFileDesc desc = ParseShapefiles.findDescription(selectedFile);
 
-                if (desc.type == GeometryTypeString.POINT) {
-                    if (desc.projectionSystem != null) {
-                        appendToMessage("Points projection system: " + desc.projectionSystem, false);
-                        if (desc.labels.size() > 1) {
+                if (desc.getType() == GeometryTypeString.POINT) {
+                    if (desc.getProjectionSystem() != null) {
+                        appendToMessage("Points projection system: " + desc.getProjectionSystem(), false);
+                        if (desc.getLabels().size() > 1) {
                             is.setStationsFile(selectedFile);
-                            attributeCombo.setModel(new DefaultComboBoxModel(desc.labels.toArray()));
+                            attributeCombo.setModel(new DefaultComboBoxModel(desc.getLabels().toArray()));
                             attributeCombo.setEnabled(true);
                             attributeCombo.setSelectedIndex(1);
                             is.setAttributeForStationLabel((String) attributeCombo.getSelectedItem());
@@ -332,7 +409,7 @@ public class MainGUI extends javax.swing.JFrame {
                         resetPoints();
                     }
                 } else {
-                    appendToMessage("Should be a Point type shapefile, found:  " + desc.type.name(), true);
+                    appendToMessage("Should be a Point type shapefile, found:  " + desc.getType().name(), true);
                     resetPoints();
                 }
             } catch (IOException ex) {
@@ -376,19 +453,20 @@ public class MainGUI extends javax.swing.JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
                 ParseShapefiles.ShapeFileDesc desc = ParseShapefiles.findDescription(selectedFile);
 
-                if (desc.type == GeometryTypeString.POLYGON) {
-                    if (desc.projectionSystem != null) {
-                        appendToMessage("Watershed projection system: " + desc.projectionSystem, false);
+                if (desc.getType() == GeometryTypeString.POLYGON) {
+                    if (desc.getProjectionSystem() != null) {
+                        appendToMessage("Watershed projection system: " + desc.getProjectionSystem(), false);
                         is.setWatershedFile(selectedFile);
                         watershedLabel.setBackground(Okay);
                         watershedShapefileLabel.setText(selectedFile.getName());
                         checkEnableViewGrid();
+
                     } else {
                         appendToMessage("No projection system found for the shapefile. <TODO: Helpful hint> Points projection system is NULL ", true);
                         resetWatershed();
                     }
                 } else {
-                    appendToMessage("Should be a Polygon type shapefile, found:  " + desc.type.name(), true);
+                    appendToMessage("Should be a Polygon type shapefile, found:  " + desc.getType().name(), true);
                     resetWatershed();
                 }
             } catch (IOException ex) {
@@ -415,7 +493,20 @@ public class MainGUI extends javax.swing.JFrame {
 
     private void renderGridButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renderGridButtonActionPerformed
         // render watershed, points and dummy grid .. change the size of the dummy grid based on the points.
+        GridMaker gridMaker = new GridMaker(is);
+        try {
+            gridMaker.displayShapeFile();
+        } catch (IOException | FactoryException | MismatchedDimensionException | TransformException ex) {
+            Logger.getLogger(MainGUI.class.getName()).log(Level.SEVERE, null, ex);
+            appendToMessage(ex.getMessage(), true);
+        }
     }//GEN-LAST:event_renderGridButtonActionPerformed
+
+    private void gridElementsNumberStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_gridElementsNumberStateChanged
+        // TODO add your handling code here:
+        is.setGridNumber((int) gridElementsNumber.getValue());
+        System.out.println(is.gridNumber);
+    }//GEN-LAST:event_gridElementsNumberStateChanged
 
     /**
      * @param args the command line arguments
@@ -463,11 +554,19 @@ public class MainGUI extends javax.swing.JFrame {
     private javax.swing.JComboBox attributeCombo;
     private javax.swing.JLabel dataLabel;
     private javax.swing.JFileChooser fileChooser;
+    private javax.swing.JSpinner gridElementsNumber;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextPane messagesPane;
     private javax.swing.JLabel rainValuesLabel;
     private javax.swing.JButton renderGridButton;
