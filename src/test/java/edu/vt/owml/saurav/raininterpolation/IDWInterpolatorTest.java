@@ -16,22 +16,8 @@
  */
 package edu.vt.owml.saurav.raininterpolation;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.util.AreaReference;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
@@ -42,201 +28,11 @@ import org.junit.Ignore;
  */
 public class IDWInterpolatorTest {
 
-    double[][] stations;
-    double[] rainValues;
-    double[][] locations;
-    List<double[]> distances;
-    double[] vals;
-    IDWInterpolator instance;
-
-    public static void printArray(double[][] dd) {
-        for (double[] d : dd) {
-            for (double q : d) {
-                System.out.print(q + "\t");
-            }
-            System.out.println("\n");
-        }
-    }
-
-    public static void printArray(double[] dd) {
-        for (double d : dd) {
-
-            System.out.println(d);
-
-        }
-    }
-
-    public static void printArray(List<double[]> dd) {
-        for (double[] d : dd) {
-            for (double q : d) {
-                System.out.print(q + "\t");
-            }
-            System.out.println("\n");
-        }
-    }
-
     public IDWInterpolatorTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     @Before
-    public void setUp() throws FileNotFoundException, IOException, InvalidFormatException {
-        instance = new IDWInterpolator();
-
-        Workbook wb;
-        wb = WorkbookFactory.create(IDWInterpolatorTest.class.getResourceAsStream("/unit_test.xlsx"));
-
-        // retrieve the named range
-        String cellname = "stations";
-        int namedCellIdx = wb.getNameIndex(cellname);
-        Name aNamedCell = wb.getNameAt(namedCellIdx);
-        // retrieve the cell at the named range and test its contents
-        AreaReference aref = new AreaReference(aNamedCell.getRefersToFormula());
-        org.apache.poi.ss.util.CellReference[] crefs = (org.apache.poi.ss.util.CellReference[]) aref.getAllReferencedCells();
-        int index = 0;
-        int columns = 2;
-        stations = new double[(int) crefs.length / columns][2];
-        for (org.apache.poi.ss.util.CellReference cref : crefs) {
-            Sheet s = wb.getSheet(cref.getSheetName());
-            Row r = s.getRow(cref.getRow());
-            Cell c = r.getCell(cref.getCol());
-            //  System.out.println(c.getNumericCellValue());
-            //2 col array
-            stations[(int) (index / columns)][index % columns] = c.getNumericCellValue();
-            index++;
-        }
-        //printArray(stations);
-
-        //rain
-        cellname = "gridpts";
-        namedCellIdx = wb.getNameIndex(cellname);
-        aNamedCell = wb.getNameAt(namedCellIdx);
-        // retrieve the cell at the named range and test its contents
-        aref = new AreaReference(aNamedCell.getRefersToFormula());
-        crefs = (org.apache.poi.ss.util.CellReference[]) aref.getAllReferencedCells();
-        index = 0;
-        columns = 2;
-        locations = new double[(int) crefs.length / columns][2];
-        for (org.apache.poi.ss.util.CellReference cref : crefs) {
-            Sheet s = wb.getSheet(cref.getSheetName());
-            Row r = s.getRow(cref.getRow());
-            Cell c = r.getCell(cref.getCol());
-            // System.out.println(c.getNumericCellValue());
-            //2 col array
-            locations[(int) (index / columns)][index % columns] = c.getNumericCellValue();
-            index++;
-        }
-       // printArray(locations);
-
-        //rain
-        cellname = "rainVal";
-        namedCellIdx = wb.getNameIndex(cellname);
-        aNamedCell = wb.getNameAt(namedCellIdx);
-        // retrieve the cell at the named range and test its contents
-        aref = new AreaReference(aNamedCell.getRefersToFormula());
-        crefs = (org.apache.poi.ss.util.CellReference[]) aref.getAllReferencedCells();
-        index = 0;
-        rainValues = new double[crefs.length];
-        for (org.apache.poi.ss.util.CellReference cref : crefs) {
-            Sheet s = wb.getSheet(cref.getSheetName());
-            Row r = s.getRow(cref.getRow());
-            Cell c = r.getCell(cref.getCol());
-            //  System.out.println(c.getNumericCellValue());
-            //2 col array
-            rainValues[index] = c.getNumericCellValue();
-            index++;
-        }
-      //  printArray(rainValues);
-
-        //vals
-        cellname = "estimates";
-        namedCellIdx = wb.getNameIndex(cellname);
-        aNamedCell = wb.getNameAt(namedCellIdx);
-        // retrieve the cell at the named range and test its contents
-        aref = new AreaReference(aNamedCell.getRefersToFormula());
-        crefs = (org.apache.poi.ss.util.CellReference[]) aref.getAllReferencedCells();
-        index = 0;
-        vals = new double[crefs.length];
-        for (org.apache.poi.ss.util.CellReference cref : crefs) {
-            Sheet s = wb.getSheet(cref.getSheetName());
-            Row r = s.getRow(cref.getRow());
-            Cell c = r.getCell(cref.getCol());
-            //   System.out.println(c.getNumericCellValue());
-            //2 col array
-            vals[index] = c.getNumericCellValue();
-            index++;
-        }
-      //  printArray(vals);
-
-        //distances
-        cellname = "distances";
-        namedCellIdx = wb.getNameIndex(cellname);
-        aNamedCell = wb.getNameAt(namedCellIdx);
-        // retrieve the cell at the named range and test its contents
-        aref = new AreaReference(aNamedCell.getRefersToFormula());
-        crefs = (org.apache.poi.ss.util.CellReference[]) aref.getAllReferencedCells();
-        index = 0;
-        columns = stations.length;
-        distances = new ArrayList();
-        double[] d = new double[stations.length];
-        for (org.apache.poi.ss.util.CellReference cref : crefs) {
-
-            Sheet s = wb.getSheet(cref.getSheetName());
-            Row r = s.getRow(cref.getRow());
-            Cell c = r.getCell(cref.getCol());
-            //    System.out.println(c.getNumericCellValue());
-            d[index % columns] = c.getNumericCellValue();
-            if (index % columns == columns - 1) {
-                distances.add(d);
-                d = new double[stations.length];
-            }
-            index++;
-
-        }
-        // printArray(distances);
-
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of getDistances method, of class IDWInterpolator.
-     */
-    @Test
-    public void testGetDistances() {
-//        System.out.println("getDistances");
-//        List<double[]> result = instance.getDistances(stations, locations);
-//        int i = 0;
-//        for (double[] d : result) {
-////            printArray(distances.get(i));
-////            printArray(d);
-//            assertArrayEquals(distances.get(i), d, 0.0001);
-//            i++;
-//        }
-
-    }
-
-    /**
-     * Test of findValueAt method, of class IDWInterpolator.
-     */
-    @Test
-    public void testFindValueAt() {
-//        System.out.println("findValueAt");
-//        // printArray(stations);
-//        // printArray(locations);
-//        // printArray(rainValues);
-//        List<double[]> resultA = instance.getDistances(stations, locations);
-//        double[] result = instance.findValueAt(stations, rainValues, locations, resultA);
-//        assertArrayEquals(vals, result, 0.00001);
+    public void setUp() {
     }
 
     /**
@@ -298,16 +94,32 @@ public class IDWInterpolatorTest {
     }
 
     /**
+     * Test of findValueAt method, of class IDWInterpolator.
+     */
+    @Test
+    public void testFindValueAt() {
+        System.out.println("findValueAt");
+        List<Double> rainValues = null;
+        List<Double> distances = null;
+        IDWInterpolator instance = new IDWInterpolator();
+        double expResult = 0.0;
+        double result = instance.findValueAt(rainValues, distances);
+        assertEquals(expResult, result, 0.0);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
      * Test of getDistance method, of class IDWInterpolator.
      */
     @Test
+    @Ignore
     public void testGetDistance() {
         System.out.println("getDistance");
         double[] station = null;
         double[] location = null;
-        IDWInterpolator instance = new IDWInterpolator();
         double expResult = 0.0;
-        double result = instance.getDistance(station, location);
+        double result = IDWInterpolator.getDistance(station, location);
         assertEquals(expResult, result, 0.0);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

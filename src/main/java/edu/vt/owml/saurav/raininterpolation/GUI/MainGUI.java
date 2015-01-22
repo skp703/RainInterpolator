@@ -61,6 +61,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     DatabaseWorker dw;
     private static String rainTable = "RAINTABLE";
     private static String resultsTable = "RESULTSTABLE";
+    private static String summaryTable = "SUMMARYTABLE";
     List<Long> dates;
     private Date minDate = new Date();
     private Date maxDate = new Date();
@@ -83,6 +84,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         messagesPane.setEditable(false);
         messagesPane.setContentType("text/html");
         dw = new DatabaseWorker();
+        databaseEngineURL.setText(dw.getURL());
         threadsSpinner.setValue(Runtime.getRuntime().availableProcessors());
         is.setNumberOfThreads(Runtime.getRuntime().availableProcessors());
         IDWPowerSpinner.setValue(2);
@@ -204,6 +206,9 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         jLabel11 = new javax.swing.JLabel();
         maxDistance = new javax.swing.JFormattedTextField();
         jPanel3 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        saveResultsButton = new javax.swing.JButton();
+        databaseEngineURL = new javax.swing.JTextField();
         progressBar = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -439,13 +444,16 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         timeRemaningLabel.setText(" ");
 
         jLabel11.setText("Neglect distances greater than (in projection system units)");
-        jLabel11.setEnabled(false);
 
-        maxDistance.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0"))));
-        maxDistance.setEnabled(false);
+        maxDistance.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         maxDistance.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 maxDistanceActionPerformed(evt);
+            }
+        });
+        maxDistance.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maxDistancePropertyChange(evt);
             }
         });
 
@@ -481,7 +489,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(timeRemaningLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                         .addComponent(jLabel9)
                         .addGap(18, 18, 18)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -517,15 +525,43 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
 
         jTabbedPane1.addTab("Execution", jPanel2);
 
+        jLabel12.setText("H2 database engine URL (works only when program is not closed)");
+
+        saveResultsButton.setText("Save daily average for the watershed");
+        saveResultsButton.setEnabled(false);
+        saveResultsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveResultsButtonActionPerformed(evt);
+            }
+        });
+
+        databaseEngineURL.setEditable(false);
+        databaseEngineURL.setText(" ");
+        databaseEngineURL.setToolTipText("");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 939, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                    .addComponent(saveResultsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(databaseEngineURL, javax.swing.GroupLayout.DEFAULT_SIZE, 588, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 148, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(databaseEngineURL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(31, 31, 31)
+                .addComponent(saveResultsButton)
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Analysis", jPanel3);
@@ -548,7 +584,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -647,7 +683,8 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
             try {
                 File selectedFile = fileChooser.getSelectedFile();
                 ParseShapefiles.ShapeFileDesc desc = ParseShapefiles.findDescription(selectedFile);
-
+                is.setMaxDistance(desc.getDistance());
+                maxDistance.setText(Double.toString(desc.getDistance()));
                 if (desc.getType() == GeometryTypeString.POLYGON) {
                     if (desc.getProjectionSystem() != null) {
                         appendToMessage("Watershed projection system: " + desc.getProjectionSystem(), false);
@@ -695,6 +732,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
             //appendToMessage("Click 'View Grid' button to recompute all inputs", true);
         } else {
             generateDailyButton.setEnabled(false);
+            saveResultsButton.setEnabled(false);
         }
     }
 
@@ -704,6 +742,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         is.setDataFile(null);
         checkEnableViewGrid();
         checkEnableGenerateDaily();
+
     }
 
     private void selectDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectDataButtonActionPerformed
@@ -728,7 +767,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
                         Logger.getLogger(MainGUI.class.getName()).log(Level.SEVERE, null, ex);
                         appendToMessage(ex.getMessage(), true);
                         resetData();
-                        disbleProgressBar();
+                        disableProgressBar();
                     }
                     return summarizeRainTable;
                 }
@@ -759,7 +798,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
                     is.setStartDate(minDate);
                     is.setEndDate(maxDate);
                     checkEnableViewGrid();
-                    disbleProgressBar();
+                    disableProgressBar();
                 }
             };
             worker.execute();
@@ -770,6 +809,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         // render watershed, points and dummy grid .. change the size of the dummy grid based on the points.
         gridMaker = new GridMaker(is);
         gridMaker.addCentersBuiltEventListener(this);
+        System.out.println("is = " + is);
         try {
             gridMaker.displayShapeFile();
         } catch (IOException | FactoryException | MismatchedDimensionException | TransformException ex) {
@@ -803,6 +843,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         is.setDates(dates);
         System.out.println(is);
         runOnce = true;// makes the progressbar update
+        System.gc();
         try {
             ///add code to call SwingWorker!!
             OverAllExecutor oe = new OverAllExecutor(is);
@@ -859,7 +900,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
 
     }
 
-    private void disbleProgressBar() {
+    private void disableProgressBar() {
         progressBar.setIndeterminate(false);
         progressBar.setEnabled(false);
         progressBar.setValue(0);
@@ -873,12 +914,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     @Override
     public void ProgressUpdateEventOccurred(ProgressUpdateEvent evt) {
         //   System.out.println(evt.getPercent());
-        if (evt.getPercent() > 100) {
-            System.out.println("Done");
-            disbleProgressBar();
-            appendToMessage("FINISHED ALL", false);
-            generateDailyButton.setEnabled(true);
-        }
+
         if (evt.getPercent() < 0) {
             if (!progressBar.isEnabled()) {
                 progressBar.setEnabled(true);
@@ -899,9 +935,19 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
             progressBar.setValue(evt.getPercent());
             if (evt.getPercent() != lastPer) {
                 lastPer = evt.getPercent();
-                long timeLeft = (System.currentTimeMillis() - startTime) / lastPer * 100;
-                String minLeft = timeLeft / 1000 / 60 < 1 ? "<1 min" : timeLeft / 1000 / 60 + " min";
+                long timeLeft = (System.currentTimeMillis() - startTime) / lastPer * (100 - lastPer);
+                String minLeft = timeLeft / 1000 / 60 < 1 ? "<1 min left" : timeLeft / 1000 / 60 + " min left";
                 timeRemaningLabel.setText(minLeft);
+            }
+            if (evt.getPercent() > 100) {
+                System.out.println("Done Computing");
+                progressBar.setValue(0);
+                disableProgressBar();
+                timeRemaningLabel.setText(" ");
+                appendToMessage("FINISHED ALL", false);
+                generateDailyButton.setEnabled(true);
+
+                saveResultsButton.setEnabled(true);
             }
         }
 
@@ -919,7 +965,56 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
 
     private void maxDistanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxDistanceActionPerformed
         // TODO add your handling code here:
+        if (maxDistance.getText().isEmpty()) {
+            is.setMaxDistance(-1);
+        } else {
+            is.setMaxDistance(Double.parseDouble(maxDistance.getText()));
+            appendToMessage("IDWDistance Cutoff: " + is.getMaxDistance(), false);
+        }
     }//GEN-LAST:event_maxDistanceActionPerformed
+
+    private void maxDistancePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxDistancePropertyChange
+        // TODO add your handling code here:
+        if (maxDistance.getText().isEmpty()) {
+            if (is != null) {
+                is.setMaxDistance(-1);
+            }
+        } else {
+            is.setMaxDistance(Double.parseDouble(maxDistance.getText()));
+            appendToMessage("IDWDistance Cutoff: " + is.getMaxDistance(), false);
+        }
+    }//GEN-LAST:event_maxDistancePropertyChange
+
+    private void saveResultsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveResultsButtonActionPerformed
+        // TODO add your handling code here:
+        fileChooser.setFileFilter(new FileNameExtensionFilter("CSV", "csv"));
+
+        int showSaveDialog = fileChooser.showSaveDialog(this);
+        enableProgressBar(true);
+        saveResultsButton.setEnabled(false);
+        if (showSaveDialog == JFileChooser.APPROVE_OPTION) {
+            final File selectedFile = fileChooser.getSelectedFile();
+            SwingWorker worker = new SwingWorker<Void, Void>() {
+
+                @Override
+                protected Void doInBackground() throws Exception {
+                    dw.saveResults(selectedFile.getAbsolutePath(), summaryTable, resultsTable);
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    super.done();
+                    saveResultsButton.setEnabled(true);
+                    disableProgressBar();
+                    appendToMessage("Done saving file " + selectedFile.getAbsolutePath(), false);
+                }
+
+            };
+            worker.execute();
+            appendToMessage("Saving file " + selectedFile.getAbsolutePath(), false);
+        }
+    }//GEN-LAST:event_saveResultsButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -930,18 +1025,18 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainGUI.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//
+//                }
+//            }
+//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(MainGUI.class
+//                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
         //</editor-fold>
 
         //</editor-fold>
@@ -963,6 +1058,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     private javax.swing.JSpinner IDWPowerSpinner;
     private javax.swing.JComboBox attributeCombo;
     private javax.swing.JLabel dataLabel;
+    private javax.swing.JTextField databaseEngineURL;
     private javax.swing.JFormattedTextField endDateField;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JButton generateDailyButton;
@@ -971,6 +1067,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -989,6 +1086,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel rainValuesLabel;
     private javax.swing.JButton renderGridButton;
+    private javax.swing.JButton saveResultsButton;
     private javax.swing.JButton selectDataButton;
     private javax.swing.JButton selectStationButton;
     private javax.swing.JButton selectWatershedButton;

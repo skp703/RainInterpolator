@@ -84,17 +84,23 @@ public class IDWInterpolator {
         double num = 0;
         double din = 0;
         int j = 0;
+        if (rainValues.isEmpty()) {
+            return 0;
+        }
         for (double d : distances) {
             if (d == 0) {
                 num = rainValues.get(j);
                 din = 1;
                 break;
             }
+            if (cutoffDistance > 0 && d > cutoffDistance) {
+                continue;
+            }
             num = num + rainValues.get(j) / Math.pow(d, power);
             din = din + 1 / Math.pow(d, power);
             j++;
         }
-        return num / din;
+        return din == 0 ? 0 : num / din;
     }
 
     /**

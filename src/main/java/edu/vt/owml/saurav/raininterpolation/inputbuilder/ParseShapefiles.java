@@ -62,9 +62,13 @@ public class ParseShapefiles {
 //        System.out.println(coordinateReferenceSystem.getCoordinateSystem().getName().toString());
         //type
         System.out.println(parseGeometry(type));
-        return new ShapeFileDesc(coordinateReferenceSystem == null ? null : coordinateReferenceSystem.getCoordinateSystem().getName().toString(), parseGeometry(type), labels);
-    }
+        double w = store.getFeatureSource().getBounds().getWidth();
+        double h = store.getFeatureSource().getBounds().getHeight();
 
+        return new ShapeFileDesc(coordinateReferenceSystem == null ? null : coordinateReferenceSystem.getCoordinateSystem().getName().toString(),
+                parseGeometry(type), labels, Math.sqrt(w * w + h * h));
+    }
+    
     public static List<String> readAttributes(File file, String attribute) throws IOException {
         List<String> values = new ArrayList();
         FileDataStore store = FileDataStoreFinder.getDataStore(file);
@@ -76,6 +80,7 @@ public class ParseShapefiles {
                 System.out.println(next.getAttribute(attribute).toString());
             }
         }
+
         return values;
     }
 
@@ -103,11 +108,13 @@ public class ParseShapefiles {
         String projectionSystem;
         GeometryTypeString type;
         List<String> labels;
+        double distance;
 
-        public ShapeFileDesc(String projectionSystem, GeometryTypeString type, List<String> labels) {
+        public ShapeFileDesc(String projectionSystem, GeometryTypeString type, List<String> labels, double distance) {
             this.projectionSystem = projectionSystem;
             this.type = type;
             this.labels = labels;
+            this.distance = distance;
         }
 
         public String getProjectionSystem() {
@@ -132,6 +139,14 @@ public class ParseShapefiles {
 
         public void setLabels(List<String> labels) {
             this.labels = labels;
+        }
+
+        public double getDistance() {
+            return distance;
+        }
+
+        public void setDistance(double distance) {
+            this.distance = distance;
         }
 
     }

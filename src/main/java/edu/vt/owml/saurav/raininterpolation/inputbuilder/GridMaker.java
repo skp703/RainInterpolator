@@ -89,6 +89,7 @@ public class GridMaker {
     private FeatureSource grid, points;
     InputDataCoordinates idc;
     List<Integer> grids;
+    ;
 
     private static StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory(null);
     private static FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory(null);
@@ -179,8 +180,9 @@ public class GridMaker {
                 "Grid");
         map.addLayer(layer);
 
-        // Create  layer and render points
+        // Create  layer and render points Stations
         store = FileDataStoreFinder.getDataStore(input.getStationsFile());
+
         points = store.getFeatureSource();
         //getCenters(featureSource);
         style = createStyle(points);
@@ -237,6 +239,8 @@ public class GridMaker {
                     ) {
                         try {
                             saveCenters();
+
+                            map.dispose();
                         } catch (IOException | FactoryException | MismatchedDimensionException | TransformException ex) {
                             Logger.getLogger(GridMaker.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -250,13 +254,15 @@ public class GridMaker {
         // put grid
         FeatureCollection features = grid.getFeatures();
         FeatureIterator it = features.features();
+        System.out.println("GridPoints:");
         while (it.hasNext()) {
             Feature next = it.next();
             Geometry geometry2 = (Geometry) ((SimpleFeature) next).getDefaultGeometry();
-            // System.out.println(((SimpleFeature) next).getAttribute("id") + ": " + geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
+
+            System.out.println(((SimpleFeature) next).getAttribute("id") + ": " + geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
             idc.addGridPoints((int) ((SimpleFeature) next).getAttribute("id"), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
         }
-
+        it.close();
         //transform as put grid
         CoordinateReferenceSystem dataCRS = points.getBounds().getCoordinateReferenceSystem();
         CoordinateReferenceSystem worldCRS = grid.getBounds().getCoordinateReferenceSystem();
@@ -264,12 +270,14 @@ public class GridMaker {
         MathTransform transform = CRS.findMathTransform(dataCRS, worldCRS, lenient);
         features = points.getFeatures();
         it = features.features();
+        System.out.println("Stations:");
         while (it.hasNext()) {
             Feature next = it.next();
             Geometry geometry = (Geometry) ((SimpleFeature) next).getDefaultGeometry();
             Geometry geometry2 = JTS.transform(geometry, transform);
-            // System.out.print(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()) + ": " + geometry.getCentroid().getX() + "\t" + geometry.getCentroid().getY() + "\t");
-            //System.out.println(geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
+
+            System.out.print(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()) + ": " + geometry.getCentroid().getX() + "\t" + geometry.getCentroid().getY() + "\t");
+            System.out.println(geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
             idc.addStation(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()).toString(), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
         }
         fireCentersBuiltEvent(new CentersBuiltEvent(this));

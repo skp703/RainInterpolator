@@ -35,6 +35,7 @@ public class DatabaseWorker {
 
     private Server server;
     private static Queue<Connection> connections = new LinkedList<>();
+    public String URL;
 
     public DatabaseWorker() throws ClassNotFoundException, SQLException {
         Class.forName("org.h2.Driver");
@@ -43,6 +44,7 @@ public class DatabaseWorker {
         server = Server.createTcpServer().start();
         System.out.println("Server started and connection is open.");
         System.out.println("URL: jdbc:h2:" + server.getURL() + "/mem:rain");
+        URL = "jdbc:h2:" + server.getURL() + "/mem:rain";
         connections.offer(conn);
     }
 
@@ -64,6 +66,16 @@ public class DatabaseWorker {
         conn.createStatement().execute("DROP TABLE IF EXISTS " + tableName);
         conn.createStatement().execute("CREATE TABLE " + tableName + " (station varchar(255), date1 int, val1 double, "
                 + "Primary key(station,date1)) AS SELECT * FROM CSVREAD('" + csvFile + "');");
+        conn.createStatement().execute("DELETE FROM " + tableName + " where val1=0");
+        DatabaseWorker.returnConnection(conn);
+        System.out.println("Data Loaded");
+    }
+
+    public void saveResults(String csvFile, String tableName, String resultstableName) throws SQLException {
+        Connection conn = DatabaseWorker.getConnection();
+        conn.createStatement().execute("DROP TABLE IF EXISTS " + tableName);
+        conn.createStatement().execute("create table " + tableName + " ( date1 int, val1 double, Primary key(date1)) as select DATE1, AVG(VAL1) from " + resultstableName + " group by Date1  ");
+        conn.createStatement().execute("CALL CSVWRITE('" + csvFile + ".csv" + "', 'SELECT * FROM " + tableName + "')");
         DatabaseWorker.returnConnection(conn);
         System.out.println("Data Loaded");
     }
@@ -79,6 +91,14 @@ public class DatabaseWorker {
         }
         DatabaseWorker.returnConnection(conn);
         return ls;
+    }
+
+    public String getURL() {
+        return URL;
+    }
+
+    public void setURL(String URL) {
+        this.URL = URL;
     }
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {

@@ -45,6 +45,11 @@ public class DistanceStore {
                 Integer gridkey = n.getKey();
                 double[] value = n.getValue();
                 gridMap.put(gridkey, IDWInterpolator.getDistance(stationC, value));
+
+                //output for test only
+                if (gridkey % 180 == 0) {
+                    System.out.println(gridkey + "," + stationkey + ":" + IDWInterpolator.getDistance(stationC, value));
+                }
             }
             distances.put(stationkey, gridMap);
 

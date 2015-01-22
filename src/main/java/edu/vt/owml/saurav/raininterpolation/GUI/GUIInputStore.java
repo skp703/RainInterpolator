@@ -33,10 +33,11 @@ public class GUIInputStore {
     Date startDate, endDate;
     int numberOfThreads;
     int power;
-    String rainTable, resultTable;
+    String rainTable, resultTable, summaryTable;
     List<Long> dates;
     InputDataCoordinates idc;
     List<Integer> grids;
+    double maxDistance;
 
     public File getStationsFile() {
         return stationsFile;
@@ -142,6 +143,14 @@ public class GUIInputStore {
         this.idc = idc;
     }
 
+    public double getMaxDistance() {
+        return maxDistance;
+    }
+
+    public void setMaxDistance(double maxDistance) {
+        this.maxDistance = maxDistance;
+    }
+
     public boolean showViewGrid() {
         return stationsFile != null && watershedFile != null && dataFile != null && attributeForStationLabel != null;
 
@@ -157,6 +166,14 @@ public class GUIInputStore {
 
     public void setGrids(List<Integer> grids) {
         this.grids = grids;
+    }
+
+    public String getSummaryTable() {
+        return summaryTable;
+    }
+
+    public void setSummaryTable(String summaryTable) {
+        this.summaryTable = summaryTable;
     }
 
     @Override

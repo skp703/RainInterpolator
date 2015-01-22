@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
@@ -83,7 +82,8 @@ public class OverAllExecutor extends SwingWorker<Void, OneDayExecutor> {
         DistanceStore ds = new DistanceStore(in.getIdc());
         System.out.println("Adding to pool");
         for (Long date : in.getDates()) {
-            OneDayExecutor O = new OneDayExecutor(date, ds, in.getRainTable(), in.getResultTable(), new IDWInterpolator(in.getPower()), in.getGrids());
+            OneDayExecutor O = new OneDayExecutor(date, ds, in.getRainTable(), in.getResultTable(),
+                    new IDWInterpolator(in.getPower(), in.getMaxDistance()), in.getGrids());
             futures.add(pool.submit(O));
 
         }
@@ -97,6 +97,7 @@ public class OverAllExecutor extends SwingWorker<Void, OneDayExecutor> {
                 }
             }
             futures.removeAll(finished);
+            //System.gc();
         }
         return null;
     }

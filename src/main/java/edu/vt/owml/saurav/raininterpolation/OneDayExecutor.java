@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,6 +71,10 @@ public class OneDayExecutor implements Callable {
                 double findValueAt = idw.findValueAt(rainVal, distances);
                 //System.out.println("findValueAt = " + findValueAt);
                 conn.createStatement().execute("Insert into " + resultTable + " values (" + date + "," + i + "," + findValueAt + ")");
+                //testing code
+                if (i % 180 == 0 && (new Random()).nextInt(10000) == 33) {
+                    System.out.println(i + "\t" + date + "\t" + findValueAt + "\t" + expandArray(rainVal) + "\t" + expandArray(distances));
+                }
             }
 
         } catch (SQLException ex) {
@@ -81,6 +86,14 @@ public class OneDayExecutor implements Callable {
                 Logger.getLogger(OneDayExecutor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private String expandArray(List<Double> dd) {
+        StringBuffer s = new StringBuffer("");
+        for (Double d : dd) {
+            s = s.append(d.toString()).append(",");
+        }
+        return s.toString();
     }
 
     @Override
