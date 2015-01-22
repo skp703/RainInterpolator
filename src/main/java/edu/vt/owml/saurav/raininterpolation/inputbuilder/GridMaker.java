@@ -21,15 +21,20 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
+import edu.vt.owml.saurav.raininterpolation.GUI.CentersBuiltEvent;
+import edu.vt.owml.saurav.raininterpolation.GUI.CentersBuiltEvent.CentersBuiltEventListener;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
+import javax.swing.event.EventListenerList;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FileDataStore;
@@ -79,19 +84,39 @@ import org.opengis.referencing.operation.TransformException;
 public class GridMaker {
 
     private int gridNumber;
-    GUIInputStore input;
-    MapContent map;
-    FeatureSource grid, points;
+    private GUIInputStore input;
+    private MapContent map;
+    private FeatureSource grid, points;
     InputDataCoordinates idc;
+    List<Integer> grids;
 
-    static StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory(null);
-    static FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory(null);
+    private static StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory(null);
+    private static FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory(null);
+    protected EventListenerList listenerList = new EventListenerList();
+
+    public void addCentersBuiltEventListener(CentersBuiltEventListener listener) {
+        listenerList.add(CentersBuiltEventListener.class, listener);
+    }
+
+    public void removeCentersBuiltEventListener(CentersBuiltEventListener listener) {
+        listenerList.remove(CentersBuiltEventListener.class, listener);
+    }
+
+    void fireCentersBuiltEvent(CentersBuiltEvent evt) {
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if (listeners[i] == CentersBuiltEventListener.class) {
+                ((CentersBuiltEventListener) listeners[i + 1]).CentersBuiltEventOccurred(evt);
+            }
+        }
+    }
 
     public GridMaker(GUIInputStore input) {
         this.input = input;
         this.gridNumber = input.getGridNumber();
         map = new MapContent();
         idc = new InputDataCoordinates();
+        grids = new ArrayList();
     }
 
     private static double getGridSizeEstimate(ReferencedEnvelope envelope, int divideby) throws IOException {
@@ -114,27 +139,44 @@ public class GridMaker {
         ReferencedEnvelope gridBounds = Envelopes.expandToInclude(featureSource.getBounds(), gridSize);
         SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
         tb.setName("grid");
-        tb.add(GridFeatureBuilder.DEFAULT_GEOMETRY_ATTRIBUTE_NAME,
-                Polygon.class, gridBounds.getCoordinateReferenceSystem());
-        tb.add("id", Integer.class);
+        tb
+                .add(GridFeatureBuilder.DEFAULT_GEOMETRY_ATTRIBUTE_NAME,
+                        Polygon.class, gridBounds.getCoordinateReferenceSystem());
+        tb.add(
+                "id", Integer.class
+        );
         SimpleFeatureType TYPE = tb.buildFeatureType();
         GridFeatureBuilder builder = new IntersectionBuilder(TYPE, featureSource);
         grid = Grids.createHexagonalGrid(gridBounds, gridSize, -1, builder);
         style = createPolygonStyle2();
         TextSymbolizer ts = styleFactory.createTextSymbolizer();
+
         ts.setFill(styleFactory.createFill(
                 filterFactory.literal(Color.GRAY),
                 filterFactory.literal(0.5)));
         ts.setFont(styleFactory.getDefaultFont());
         AttributeExpressionImpl ae = new AttributeExpressionImpl("id");
+
         //TODO change label placemant
         ts.setLabel(ae);
         Rule rule = styleFactory.createRule();
-        rule.symbolizers().add(ts);
+
+        rule.symbolizers()
+                .add(ts);
         FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(new Rule[]{rule});
-        style.featureTypeStyles().add(fts);
+
+        style.featureTypeStyles()
+                .add(fts);
+        FeatureIterator features = grid.getFeatures().features();
+        while (features.hasNext()) {
+            SimpleFeature next = (SimpleFeature) features.next();
+            Integer attribute = (Integer) next.getAttribute("id");
+            grids.add(attribute);
+        }
         layer = new FeatureLayer(grid, style);
-        layer.setTitle("Grid");
+
+        layer.setTitle(
+                "Grid");
         map.addLayer(layer);
 
         // Create  layer and render points
@@ -143,45 +185,64 @@ public class GridMaker {
         //getCenters(featureSource);
         style = createStyle(points);
         ts = styleFactory.createTextSymbolizer();
+
         ts.setFill(styleFactory.createFill(
                 filterFactory.literal(Color.BLACK),
                 filterFactory.literal(1)));
         ts.setFont(styleFactory.getDefaultFont());
         ae = new AttributeExpressionImpl(input.getAttributeForStationLabel());
+
         ts.setLabel(ae);
         rule = styleFactory.createRule();
-        rule.symbolizers().add(ts);
+
+        rule.symbolizers()
+                .add(ts);
         fts = styleFactory.createFeatureTypeStyle(new Rule[]{rule});
-        style.featureTypeStyles().add(fts);
+
+        style.featureTypeStyles()
+                .add(fts);
 
         layer = new FeatureLayer(points, style);
-        layer.setTitle("Stations");
+
+        layer.setTitle(
+                "Stations");
         map.addLayer(layer);
 
         // Now display the map
-        map.setTitle("Watershed, Stations, and Grid");
+        map.setTitle(
+                "Watershed, Stations, and Grid");
         JMapFrame show = new JMapFrame(map);
+
         // do not close all application on close
         show.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        show.setSize(900, 600);
+
+        show.setSize(
+                900, 600);
         // zoom in, zoom out, pan, show all
-        show.enableToolBar(true);
+        show.enableToolBar(
+                true);
         // location of cursor and bounds of current
-        show.enableStatusBar(true);
+        show.enableStatusBar(
+                true);
         // list layers and set them as visible + selected
-        show.enableLayerTable(true);
+        show.enableLayerTable(
+                true);
         // display
-        show.setVisible(true);
-        show.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent event) {
-                try {
-                    saveCenters();
-                } catch (IOException | FactoryException | MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(GridMaker.class.getName()).log(Level.SEVERE, null, ex);
+        show.setVisible(
+                true);
+        show.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent event
+                    ) {
+                        try {
+                            saveCenters();
+                        } catch (IOException | FactoryException | MismatchedDimensionException | TransformException ex) {
+                            Logger.getLogger(GridMaker.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                 }
-            }
-        });
+        );
 
     }
 
@@ -192,7 +253,7 @@ public class GridMaker {
         while (it.hasNext()) {
             Feature next = it.next();
             Geometry geometry2 = (Geometry) ((SimpleFeature) next).getDefaultGeometry();
-            System.out.println(((SimpleFeature) next).getAttribute("id") + ": " + geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
+            // System.out.println(((SimpleFeature) next).getAttribute("id") + ": " + geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
             idc.addGridPoints((int) ((SimpleFeature) next).getAttribute("id"), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
         }
 
@@ -207,11 +268,11 @@ public class GridMaker {
             Feature next = it.next();
             Geometry geometry = (Geometry) ((SimpleFeature) next).getDefaultGeometry();
             Geometry geometry2 = JTS.transform(geometry, transform);
-            System.out.print(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()) + ": " + geometry.getCentroid().getX() + "\t" + geometry.getCentroid().getY() + "\t");
-            System.out.println(geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
-            idc.addStation((String) ((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
+            // System.out.print(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()) + ": " + geometry.getCentroid().getX() + "\t" + geometry.getCentroid().getY() + "\t");
+            //System.out.println(geometry2.getCentroid().getX() + "\t" + geometry2.getCentroid().getY());
+            idc.addStation(((SimpleFeature) next).getAttribute(input.getAttributeForStationLabel()).toString(), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
         }
-
+        fireCentersBuiltEvent(new CentersBuiltEvent(this));
     }
 
     /**
@@ -351,54 +412,6 @@ public class GridMaker {
         return style;
     }
 
-    public int getGridSize() {
-        return gridNumber;
-    }
-
-    public void setGridSize(int gridSize) {
-        this.gridNumber = gridSize;
-    }
-
-    public GUIInputStore getInput() {
-        return input;
-    }
-
-    public void setInput(GUIInputStore input) {
-        this.input = input;
-    }
-
-    public int getGridNumber() {
-        return gridNumber;
-    }
-
-    public void setGridNumber(int gridNumber) {
-        this.gridNumber = gridNumber;
-    }
-
-    public MapContent getMap() {
-        return map;
-    }
-
-    public void setMap(MapContent map) {
-        this.map = map;
-    }
-
-    public FeatureSource getGrid() {
-        return grid;
-    }
-
-    public void setGrid(FeatureSource grid) {
-        this.grid = grid;
-    }
-
-    public FeatureSource getPoints() {
-        return points;
-    }
-
-    public void setPoints(FeatureSource points) {
-        this.points = points;
-    }
-
     public InputDataCoordinates getIdc() {
         return idc;
     }
@@ -407,20 +420,12 @@ public class GridMaker {
         this.idc = idc;
     }
 
-    public static StyleFactory getStyleFactory() {
-        return styleFactory;
+    public List<Integer> getGrids() {
+        return grids;
     }
 
-    public static void setStyleFactory(StyleFactory styleFactory) {
-        GridMaker.styleFactory = styleFactory;
-    }
-
-    public static FilterFactory getFilterFactory() {
-        return filterFactory;
-    }
-
-    public static void setFilterFactory(FilterFactory filterFactory) {
-        GridMaker.filterFactory = filterFactory;
+    public void setGrids(List<Integer> grids) {
+        this.grids = grids;
     }
 
     public static void main(String[] args) throws IOException, FactoryException, MismatchedDimensionException, TransformException {

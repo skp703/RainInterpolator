@@ -184,7 +184,7 @@ public class NewMain {
             printArray(distances);
 
             IDWInterpolator idw = new IDWInterpolator();
-            printArray(idw.getDistances(stations, locations));
+            // printArray(idw.getDistances(stations, locations));
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(NewMain.class.getName()).log(Level.SEVERE, null, ex);

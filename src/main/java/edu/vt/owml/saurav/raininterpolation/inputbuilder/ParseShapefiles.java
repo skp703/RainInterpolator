@@ -59,21 +59,22 @@ public class ParseShapefiles {
             System.out.println(a.getLocalName());
         }
         //projection system
-        System.out.println(coordinateReferenceSystem.getCoordinateSystem().getName().toString());
+//        System.out.println(coordinateReferenceSystem.getCoordinateSystem().getName().toString());
         //type
         System.out.println(parseGeometry(type));
-        return new ShapeFileDesc(coordinateReferenceSystem.getCoordinateSystem().getName().toString(), parseGeometry(type), labels);
+        return new ShapeFileDesc(coordinateReferenceSystem == null ? null : coordinateReferenceSystem.getCoordinateSystem().getName().toString(), parseGeometry(type), labels);
     }
 
     public static List<String> readAttributes(File file, String attribute) throws IOException {
         List<String> values = new ArrayList();
         FileDataStore store = FileDataStoreFinder.getDataStore(file);
-        FeatureReader<SimpleFeatureType, SimpleFeature> featureReader = store.getFeatureReader();
-        while (featureReader.hasNext()) {
-            SimpleFeature next = featureReader.next();
-            values.add(next.getAttribute(attribute).toString());
-            // values
-            System.out.println(next.getAttribute(attribute).toString());
+        try (FeatureReader<SimpleFeatureType, SimpleFeature> featureReader = store.getFeatureReader()) {
+            while (featureReader.hasNext()) {
+                SimpleFeature next = featureReader.next();
+                values.add(next.getAttribute(attribute).toString());
+                // values
+                System.out.println(next.getAttribute(attribute).toString());
+            }
         }
         return values;
     }

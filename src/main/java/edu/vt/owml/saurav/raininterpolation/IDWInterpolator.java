@@ -16,14 +16,13 @@
  */
 package edu.vt.owml.saurav.raininterpolation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  *
  * @author saurav
  */
-public class IDWInterpolator implements RainInterpolator {
+public class IDWInterpolator {
 
     public static String powerParam = "POWER";
     public static double defaultPower = 2;
@@ -75,73 +74,41 @@ public class IDWInterpolator implements RainInterpolator {
      * inverse distance weighting
      * {@link http://en.wikipedia.org/wiki/Inverse_distance_weighting}
      *
-     * @param stations is a array of coordinates where rain data is available.
-     * Note that all coordinates values should be provided using an imaginary
-     * box with top left corner is 0,0. X coordinate increases right and Y
-     * coordinate increases downwards. See Java 2D coordinates
-     * {@Link http://docs.oracle.com/javase/tutorial/2d/overview/coordinate.html}
-     * @param rainValues observed rain data. Length of this array should be same
-     * as the length of {@code coordinates} array
-     * @param locations location[:][0] is the X and location[:][1] is Y
-     * coordinates of the points where data is desired. Note this uses the same
-     * reference as the first argument {@code coordinates}
-     * @return rain estimates in an array for the locations
+     *
+     * @param rainValues
+     * @param distances
+     * @return
      */
-    @Override
-    public double[] findValueAt(double[][] stations, double[] rainValues, double[][] locations) {
-        long startTime = System.currentTimeMillis();
-        List<double[]> distances = getDistances(stations, locations);
+    public double findValueAt(List<Double> rainValues, List<Double> distances) {
 
-        double[] values = new double[locations.length];
-        for (int i = 0; i < distances.size(); i++) {
-            double num = 0;
-            double din = 0;
-            int j = 0;
-            for (double d : distances.get(i)) {
-                if (d == 0) {
-                    num = rainValues[j];
-                    din = 1;
-                    break;
-                }
-                num = num + rainValues[j] / Math.pow(d, power);
-                din = din + 1 / Math.pow(d, power);
-                j++;
+        double num = 0;
+        double din = 0;
+        int j = 0;
+        for (double d : distances) {
+            if (d == 0) {
+                num = rainValues.get(j);
+                din = 1;
+                break;
             }
-            values[i] = num / din;
+            num = num + rainValues.get(j) / Math.pow(d, power);
+            din = din + 1 / Math.pow(d, power);
+            j++;
         }
-        System.out.println("FIND VALUE AT FINISHED IN: (ms)" + Long.toString(System.currentTimeMillis() - startTime));
-        return values;
+        return num / din;
     }
 
     /**
-     * compute distances for a set of locations from a set of stations.
      *
-     * @param stations a two column array for station locations with [0] as X
-     * coordinate and [1] as Y coordinate
-     * @param locations a two column array for grid points with [0] as X
-     * coordinate and [1] as Y coordinate
-     * @return a list, where each element in the list is a double array with
-     * same length as stations array, representing the length from the station
-     * at the same index in the {@code stations} input array
+     * @param station
+     * @param location
+     * @return
      */
-    public List<double[]> getDistances(double[][] stations, double[][] locations) {
-        System.out.println(stations.length + " ???" + locations.length);
-        long startTime = System.currentTimeMillis();
-        List<double[]> distances = new ArrayList(locations.length);
+    public static double getDistance(double[] station, double[] location) {
 
-        for (double[] l : locations) {
-            double[] distance = new double[stations.length];
-            int i = 0;
-            for (double[] c : stations) {
-                double dx = l[0] - c[0];
-                double dy = l[1] - c[1];
-                distance[i] = Math.sqrt(dx * dx + dy * dy);
-                i++;
-            }
-            distances.add(distance);
-        }
-        System.out.println("FIND DISTANCE FINISHED IN: (ms)" + Long.toString(System.currentTimeMillis() - startTime));
-        return distances;
+        double dx = station[0] - location[0];
+        double dy = station[1] - location[1];
+        return Math.sqrt(dx * dx + dy * dy);
+
     }
 
 }

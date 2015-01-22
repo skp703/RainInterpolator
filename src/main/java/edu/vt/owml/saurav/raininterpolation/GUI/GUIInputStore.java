@@ -16,7 +16,10 @@
  */
 package edu.vt.owml.saurav.raininterpolation.GUI;
 
+import edu.vt.owml.saurav.raininterpolation.inputbuilder.InputDataCoordinates;
 import java.io.File;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -27,6 +30,13 @@ public class GUIInputStore {
     File stationsFile, watershedFile, dataFile;
     String attributeForStationLabel;
     int gridNumber;
+    Date startDate, endDate;
+    int numberOfThreads;
+    int power;
+    String rainTable, resultTable;
+    List<Long> dates;
+    InputDataCoordinates idc;
+    List<Integer> grids;
 
     public File getStationsFile() {
         return stationsFile;
@@ -66,6 +76,92 @@ public class GUIInputStore {
 
     public void setGridNumber(int gridNumber) {
         this.gridNumber = gridNumber;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public int getNumberOfThreads() {
+        return numberOfThreads;
+    }
+
+    public void setNumberOfThreads(int numberOfThreads) {
+        this.numberOfThreads = numberOfThreads;
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    public String getRainTable() {
+        return rainTable;
+    }
+
+    public void setRainTable(String rainTable) {
+        this.rainTable = rainTable;
+    }
+
+    public String getResultTable() {
+        return resultTable;
+    }
+
+    public void setResultTable(String resultTable) {
+        this.resultTable = resultTable;
+    }
+
+    public List<Long> getDates() {
+        return dates;
+    }
+
+    public void setDates(List<Long> dates) {
+        this.dates = dates;
+    }
+
+    public InputDataCoordinates getIdc() {
+        return idc;
+    }
+
+    public void setIdc(InputDataCoordinates idc) {
+        this.idc = idc;
+    }
+
+    public boolean showViewGrid() {
+        return stationsFile != null && watershedFile != null && dataFile != null && attributeForStationLabel != null;
+
+    }
+
+    public boolean showGenerateDaily() {
+        return stationsFile != null && watershedFile != null && dataFile != null && attributeForStationLabel != null && idc != null;
+    }
+
+    public List<Integer> getGrids() {
+        return grids;
+    }
+
+    public void setGrids(List<Integer> grids) {
+        this.grids = grids;
+    }
+
+    @Override
+    public String toString() {
+        return "GUIInputStore{" + "stationsFile=" + stationsFile + ", watershedFile=" + watershedFile + ", dataFile=" + dataFile + ", attributeForStationLabel=" + attributeForStationLabel + ", gridNumber=" + gridNumber + ", startDate=" + startDate + ", endDate=" + endDate + ", numberOfThreads=" + numberOfThreads + ", power=" + power + ", rainTable=" + rainTable + ", resultTable=" + resultTable + ", dates=" + dates + ", idc=" + idc + '}';
     }
 
 }
