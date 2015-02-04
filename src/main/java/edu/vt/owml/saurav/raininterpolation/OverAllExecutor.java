@@ -30,6 +30,9 @@ import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
 /**
+ * A class that extends SwingWorker. To run threaded interpolation It fires
+ * ProgressUpdateEvent with percent complete. Percent complete is 101 when
+ * finished i.e. done method is called
  *
  * @author saurav
  */
@@ -60,6 +63,11 @@ public class OverAllExecutor extends SwingWorker<Void, OneDayExecutor> {
 
     private final ExecutorService pool;
 
+    /**
+     *
+     * @param in GUIInputStore all the input parameters
+     * @throws SQLException
+     */
     public OverAllExecutor(GUIInputStore in) throws SQLException {
         this.in = in;
 

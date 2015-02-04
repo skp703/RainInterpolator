@@ -68,7 +68,7 @@ public class ParseShapefiles {
         return new ShapeFileDesc(coordinateReferenceSystem == null ? null : coordinateReferenceSystem.getCoordinateSystem().getName().toString(),
                 parseGeometry(type), labels, Math.sqrt(w * w + h * h));
     }
-    
+
     public static List<String> readAttributes(File file, String attribute) throws IOException {
         List<String> values = new ArrayList();
         FileDataStore store = FileDataStoreFinder.getDataStore(file);
@@ -149,12 +149,6 @@ public class ParseShapefiles {
             this.distance = distance;
         }
 
-    }
-
-    public static void main(String[] args) throws IOException {
-        String shapeFile = "U:/dataBackup/gis/new-segmentation/occ_st_station.shp";
-        // findDescription(new File(shapeFile));
-        readAttributes(new File(shapeFile), "ID");
     }
 
 }

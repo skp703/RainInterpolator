@@ -16,12 +16,13 @@
  */
 package edu.vt.owml.saurav.raininterpolation.GUI;
 
-import edu.vt.owml.saurav.raininterpolation.inputbuilder.InputDataCoordinates;
+import edu.vt.owml.saurav.raininterpolation.InputDataCoordinates;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 
 /**
+ * All inputs to drive the program are stored here
  *
  * @author saurav
  */

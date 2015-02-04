@@ -97,6 +97,7 @@ public class IDWInterpolatorTest {
      * Test of findValueAt method, of class IDWInterpolator.
      */
     @Test
+    @Ignore
     public void testFindValueAt() {
         System.out.println("findValueAt");
         List<Double> rainValues = null;

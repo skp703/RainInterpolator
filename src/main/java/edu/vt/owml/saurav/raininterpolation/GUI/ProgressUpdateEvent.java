@@ -20,6 +20,7 @@ import java.util.EventListener;
 import java.util.EventObject;
 
 /**
+ * Simple event fired from OverAllExecutor to communicate percent complete
  *
  * @author saurav
  */

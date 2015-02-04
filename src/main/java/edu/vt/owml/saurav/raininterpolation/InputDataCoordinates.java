@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.vt.owml.saurav.raininterpolation.inputbuilder;
+package edu.vt.owml.saurav.raininterpolation;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A placeholder for stations and gridPoints Maps. Points are represented by a 2
+ * element double array.
  *
  * @author saurav
  */

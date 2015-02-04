@@ -49,6 +49,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 /**
+ * This is the main class. Lot of work is done by GUI. Will change in later
+ * versions.
  *
  * @author saurav
  */
@@ -616,6 +618,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     private void selectStationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectStationButtonActionPerformed
         // Show shapefile chooser
         // Checks:1) shapefile has coordinate system defined,  has points, and has a attribute with label that has "name" in it.
+        fileChooser.resetChoosableFileFilters();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Shape File", "shp"));
         int showOpenDialog = fileChooser.showOpenDialog(this);
         if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
@@ -677,6 +680,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
     private void selectWatershedButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectWatershedButtonActionPerformed
         // Show shapefile chooser
         // Checks:1) shapefile has coordinate system defined,  and is a polygon
+        fileChooser.resetChoosableFileFilters();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Shape File", "shp"));
         int showOpenDialog = fileChooser.showOpenDialog(this);
         if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
@@ -747,6 +751,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
 
     private void selectDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectDataButtonActionPerformed
         // TODO code to add CSV file and also check first line has stations
+        fileChooser.resetChoosableFileFilters();
         fileChooser.setFileFilter(new FileNameExtensionFilter("CSV", "csv"));
         int showOpenDialog = fileChooser.showOpenDialog(this);
         if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
@@ -946,7 +951,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
                 timeRemaningLabel.setText(" ");
                 appendToMessage("FINISHED ALL", false);
                 generateDailyButton.setEnabled(true);
-
+                runOnce = true;// for future runs
                 saveResultsButton.setEnabled(true);
             }
         }
@@ -987,6 +992,7 @@ public class MainGUI extends javax.swing.JFrame implements CentersBuiltEventList
 
     private void saveResultsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveResultsButtonActionPerformed
         // TODO add your handling code here:
+        fileChooser.resetChoosableFileFilters();
         fileChooser.setFileFilter(new FileNameExtensionFilter("CSV", "csv"));
 
         int showSaveDialog = fileChooser.showSaveDialog(this);

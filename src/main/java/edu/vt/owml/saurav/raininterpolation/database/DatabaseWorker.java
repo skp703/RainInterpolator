@@ -16,7 +16,6 @@
  */
 package edu.vt.owml.saurav.raininterpolation.database;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -28,6 +27,8 @@ import java.util.Queue;
 import org.h2.tools.Server;
 
 /**
+ * A database worker to get connections to the in memory database. Use by the
+ * threads.
  *
  * @author saurav
  */
@@ -37,6 +38,12 @@ public class DatabaseWorker {
     private static Queue<Connection> connections = new LinkedList<>();
     public String URL;
 
+    /**
+     * Start a database engine along with a TCP server
+     *
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
     public DatabaseWorker() throws ClassNotFoundException, SQLException {
         Class.forName("org.h2.Driver");
         Connection conn = DatabaseWorker.getConnection();
@@ -61,16 +68,30 @@ public class DatabaseWorker {
 
     }
 
+    /**
+     *
+     * @param csvFile
+     * @param tableName
+     * @throws SQLException
+     */
     public void loadrainCSVinTable(String csvFile, String tableName) throws SQLException {
         Connection conn = DatabaseWorker.getConnection();
         conn.createStatement().execute("DROP TABLE IF EXISTS " + tableName);
         conn.createStatement().execute("CREATE TABLE " + tableName + " (station varchar(255), date1 int, val1 double, "
                 + "Primary key(station,date1)) AS SELECT * FROM CSVREAD('" + csvFile + "');");
-        conn.createStatement().execute("DELETE FROM " + tableName + " where val1=0");
+        //Zero is a signal cannot delete zeros
+        //conn.createStatement().execute("DELETE FROM " + tableName + " where val1=0");
         DatabaseWorker.returnConnection(conn);
         System.out.println("Data Loaded");
     }
 
+    /**
+     *
+     * @param csvFile
+     * @param tableName
+     * @param resultstableName
+     * @throws SQLException
+     */
     public void saveResults(String csvFile, String tableName, String resultstableName) throws SQLException {
         Connection conn = DatabaseWorker.getConnection();
         conn.createStatement().execute("DROP TABLE IF EXISTS " + tableName);
@@ -80,6 +101,12 @@ public class DatabaseWorker {
         System.out.println("Data Loaded");
     }
 
+    /**
+     *
+     * @param tableName
+     * @return
+     * @throws SQLException
+     */
     public List<RainSummaryData> summarizeRainTable(String tableName) throws SQLException {
         List<RainSummaryData> ls = new ArrayList();
         Connection conn = DatabaseWorker.getConnection();
@@ -99,13 +126,6 @@ public class DatabaseWorker {
 
     public void setURL(String URL) {
         this.URL = URL;
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        DatabaseWorker dw = new DatabaseWorker();
-        File f = new File("C:\\watershed_analysis\\Rain\\project\\input\\NOAA_NCDC\\rain.csv");
-        dw.loadrainCSVinTable(f.getAbsolutePath(), "rainTable");
-        dw.summarizeRainTable("rainTable");
     }
 
     public class RainSummaryData {

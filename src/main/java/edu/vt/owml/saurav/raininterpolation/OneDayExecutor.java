@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A threaded method to drive one day of interpolation.
  *
  * @author saurav
  */
@@ -41,6 +42,16 @@ public class OneDayExecutor implements Callable {
     IDWInterpolator idw;
     List<Integer> grids;
 
+    /**
+     *
+     * @param date
+     * @param ds
+     * @param rainTable
+     * @param resultTable
+     * @param idw
+     * @param grids
+     * @throws SQLException
+     */
     public OneDayExecutor(long date, DistanceStore ds, String rainTable, String resultTable, IDWInterpolator idw, List<Integer> grids) throws SQLException {
         this.date = date;
         this.ds = ds;
@@ -50,7 +61,10 @@ public class OneDayExecutor implements Callable {
         this.grids = grids;
     }
 
-    public void run() {
+    /**
+     * run() is not the override method for Callable interface, call is.
+     */
+    private void run() {
         try {
             conn = DatabaseWorker.getConnection();
             ResultSet rs = conn.createStatement().executeQuery("Select * from " + rainTable + " where date1=" + date);
@@ -72,8 +86,8 @@ public class OneDayExecutor implements Callable {
                 //System.out.println("findValueAt = " + findValueAt);
                 conn.createStatement().execute("Insert into " + resultTable + " values (" + date + "," + i + "," + findValueAt + ")");
                 //testing code
-                if (i % 180 == 0 && (new Random()).nextInt(10000) == 33) {
-                    System.out.println(i + "\t" + date + "\t" + findValueAt + "\t" + expandArray(rainVal) + "\t" + expandArray(distances));
+                if (i % 180 == 0) {
+                    LOG.log(Level.FINE, "{0}\t{1}\t{2}\t{3}\t{4}", new Object[]{i, date, findValueAt, expandArray(rainVal), expandArray(distances)});
                 }
             }
 
@@ -101,5 +115,6 @@ public class OneDayExecutor implements Callable {
         run();
         return this;
     }
+    private static final Logger LOG = Logger.getLogger(OneDayExecutor.class.getName());
 
 }

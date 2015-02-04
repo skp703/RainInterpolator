@@ -19,6 +19,8 @@ package edu.vt.owml.saurav.raininterpolation;
 import java.util.List;
 
 /**
+ * Main IDW worker
+ * {@link http://en.wikipedia.org/wiki/Inverse_distance_weighting}
  *
  * @author saurav
  */
@@ -38,11 +40,21 @@ public class IDWInterpolator {
      */
     private double cutoffDistance;
 
+    /**
+     *
+     * @param power parameter of basic IDW
+     */
     public IDWInterpolator(double power) {
         this.power = power;
         this.cutoffDistance = defaultCutOff;
     }
 
+    /**
+     *
+     * @param power parameter of basic IDW
+     * @param cutoffDistance if distance between a station and grid is more than
+     * cutoffDistance, station will be neglected. Set to -1 for no cutoff.
+     */
     public IDWInterpolator(double power, double cutoffDistance) {
         this.power = power;
         this.cutoffDistance = cutoffDistance;
@@ -75,9 +87,11 @@ public class IDWInterpolator {
      * {@link http://en.wikipedia.org/wiki/Inverse_distance_weighting}
      *
      *
-     * @param rainValues
-     * @param distances
-     * @return
+     * @param rainValues a list of rain values
+     * @param distances a list of distances of the grid from the stations
+     * (length of this list should be same as rainValue list)
+     * @return interpolated rain value. 0 is the lists are empty. the first
+     * station encountered with zero distance is also returned
      */
     public double findValueAt(List<Double> rainValues, List<Double> distances) {
 
@@ -88,22 +102,23 @@ public class IDWInterpolator {
             return 0;
         }
         for (double d : distances) {
-            if (d == 0) {
+            if (d == 0) {//station is on the grid
                 num = rainValues.get(j);
-                din = 1;
-                break;
+                return num;
             }
-            if (cutoffDistance > 0 && d > cutoffDistance) {
+            if (cutoffDistance > 0 && d > cutoffDistance) {// skip if cutoffDistance >0 and distance is greater than cutoffDistance
                 continue;
             }
-            num = num + rainValues.get(j) / Math.pow(d, power);
-            din = din + 1 / Math.pow(d, power);
+            double pow = Math.pow(d, power);
+            num = num + rainValues.get(j) / pow;
+            din = din + 1 / pow;
             j++;
         }
         return din == 0 ? 0 : num / din;
     }
 
     /**
+     * used by DistanceStore, simply computes distance
      *
      * @param station
      * @param location

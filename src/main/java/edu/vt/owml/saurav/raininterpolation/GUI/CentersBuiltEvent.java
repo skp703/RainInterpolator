@@ -20,6 +20,7 @@ import java.util.EventListener;
 import java.util.EventObject;
 
 /**
+ * Fired when all centers have been been built by GridMaker
  *
  * @author saurav
  */

@@ -16,6 +16,7 @@
  */
 package edu.vt.owml.saurav.raininterpolation.inputbuilder;
 
+import edu.vt.owml.saurav.raininterpolation.InputDataCoordinates;
 import edu.vt.owml.saurav.raininterpolation.GUI.GUIInputStore;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -26,7 +27,6 @@ import edu.vt.owml.saurav.raininterpolation.GUI.CentersBuiltEvent.CentersBuiltEv
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,12 +140,9 @@ public class GridMaker {
         ReferencedEnvelope gridBounds = Envelopes.expandToInclude(featureSource.getBounds(), gridSize);
         SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
         tb.setName("grid");
-        tb
-                .add(GridFeatureBuilder.DEFAULT_GEOMETRY_ATTRIBUTE_NAME,
-                        Polygon.class, gridBounds.getCoordinateReferenceSystem());
-        tb.add(
-                "id", Integer.class
-        );
+        tb.add(GridFeatureBuilder.DEFAULT_GEOMETRY_ATTRIBUTE_NAME,
+                Polygon.class, gridBounds.getCoordinateReferenceSystem());
+        tb.add("id", Integer.class);
         SimpleFeatureType TYPE = tb.buildFeatureType();
         GridFeatureBuilder builder = new IntersectionBuilder(TYPE, featureSource);
         grid = Grids.createHexagonalGrid(gridBounds, gridSize, -1, builder);
@@ -263,7 +260,7 @@ public class GridMaker {
             idc.addGridPoints((int) ((SimpleFeature) next).getAttribute("id"), geometry2.getCentroid().getX(), geometry2.getCentroid().getY());
         }
         it.close();
-        //transform as put grid
+        //transform as  grid
         CoordinateReferenceSystem dataCRS = points.getBounds().getCoordinateReferenceSystem();
         CoordinateReferenceSystem worldCRS = grid.getBounds().getCoordinateReferenceSystem();
         boolean lenient = true; // allow for some error due to different datums
@@ -434,14 +431,6 @@ public class GridMaker {
 
     public void setGrids(List<Integer> grids) {
         this.grids = grids;
-    }
-
-    public static void main(String[] args) throws IOException, FactoryException, MismatchedDimensionException, TransformException {
-        GUIInputStore input = new GUIInputStore();
-        input.setStationsFile(new File("C:\\watershed_analysis\\Rain\\project\\input\\GIS\\rainPoints.shp"));
-        input.setWatershedFile(new File("C:\\watershed_analysis\\Rain\\project\\input\\GIS\\occWatPolyNAD83.shp"));
-        input.setAttributeForStationLabel("STA");
-        new GridMaker(input).displayShapeFile();
     }
 
 }

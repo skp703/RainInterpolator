@@ -16,26 +16,41 @@
  */
 package edu.vt.owml.saurav.raininterpolation;
 
-import edu.vt.owml.saurav.raininterpolation.inputbuilder.InputDataCoordinates;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * As the name suggests DistanceStore is a class to store distances of stations
+ * from grid segments. The distances are stored in a Map. See code for details.
+ * When the object is created distance map is created. Reuse this class and
+ * avoid multiple initiations
  *
  * @author saurav
  */
 public class DistanceStore {
 
-    Map< String, Map<Integer, Double>> distances;
+    private Map< String, Map<Integer, Double>> distances;
 
+    /**
+     * Get distance between station and the grid cell
+     *
+     * @param station station id/name
+     * @param gridID integer grid ID
+     * @return
+     */
     double getDistance(String station, Integer gridID) {
         return distances.get(station).get(gridID);
     }
 
+    /**
+     *
+     * @param idc an object with coordinates of input stations and grid cell.
+     */
     public DistanceStore(InputDataCoordinates idc) {
         distances = new HashMap();
         Set<Map.Entry<String, double[]>> stationEntrySet = idc.getStations().entrySet();
+
         for (Map.Entry<String, double[]> m : stationEntrySet) {
             String stationkey = m.getKey();
             double[] stationC = m.getValue();
@@ -45,16 +60,17 @@ public class DistanceStore {
                 Integer gridkey = n.getKey();
                 double[] value = n.getValue();
                 gridMap.put(gridkey, IDWInterpolator.getDistance(stationC, value));
-
                 //output for test only
                 if (gridkey % 180 == 0) {
-                    System.out.println(gridkey + "," + stationkey + ":" + IDWInterpolator.getDistance(stationC, value));
+                    LOG.fine(String.format(logFormat, gridkey, stationkey, gridMap.get(gridkey)));
+                    // System.out.println(gridkey + "," + stationkey + ":" + IDWInterpolator.getDistance(stationC, value));
                 }
             }
             distances.put(stationkey, gridMap);
-
         }
 
     }
+    private static final String logFormat = "GridID:%1$d, StationID:%2$s, Distance:%3$e";
+    private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(DistanceStore.class.getName());
 
 }
